@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.yuripe.normalizator.configurations.FTPServiceCustom;
 import com.yuripe.normalizator.exceptions.CarException;
 import com.yuripe.normalizator.exceptions.CustomerException;
 import com.yuripe.normalizator.exceptions.EmployeeException;
@@ -58,7 +60,6 @@ public class BatchProxyController {
   @Autowired
   RepairRepository repairRepository;
   
-  
   @Autowired
   CarService carService;
   
@@ -72,7 +73,10 @@ public class BatchProxyController {
   RepairService repairService;
   
   @Autowired
-  JobService JobService;
+  JobService JobService;  
+  
+  @Autowired
+  FTPServiceCustom ftp;
 
   @GetMapping("/all")
   @PreAuthorize("hasRole('SUPERVISOR') or hasRole('ADMIN')")
@@ -83,23 +87,10 @@ public class BatchProxyController {
   
   @PostMapping("/launchJob")
   @PreAuthorize("hasRole('SUPERVISOR') or hasRole('ADMIN') or hasRole('USER')")
-  public ResponseEntity<?> launchJob(@PathVariable Long employeeJobing, @PathVariable Long repairId, @RequestBody NewJobRequest JobRequest) throws CarException, EmployeeException, CustomerException, RepairException {
-	  Repair rep = repairService.getRepair(repairId);
-	  Employee emp = employeeService.getEmployee(employeeJobing);
-	   
-	  Job job = new Job();
-	  job.setEmployee(emp);
-	  job.setRepair(rep);
-	  if (!validateInput(JobRequest.getNote(), JobRequest.getWorkingHours())) {
-		  throw new InputMismatchException(
-				  );
-	  }
-	  job.setNote(JobRequest.getNote());
-	  job.setJobingHours(JobRequest.getWorkingHours());
-	  job.setDate(LocalDate.now());
-
-	  JobService.addJob(job);
-	  return ResponseEntity.ok(new MessageResponse("Job added successfully!"));
+  public ResponseEntity<String> launchJob() {
+	  
+	  
+	  return ResponseEntity.ok(ftp.call() + "Job launched successfully!");
   }
   
   
