@@ -1,7 +1,7 @@
 package com.yuripe.normalizator.exceptions;
 
 @SuppressWarnings("serial")
-public class WorkException extends Exception {
+public class JobException extends Exception {
 
     private String requestId;
 
@@ -11,12 +11,12 @@ public class WorkException extends Exception {
     // Custom error code representing an error in system
     private String errorCode;
 
-    public WorkException (String message) {
+    public JobException (String message) {
             super(message);
             this.message = message;
         }
 
-    public WorkException (String requestId, String message, String errorCode) {
+    public JobException (String requestId, String message, String errorCode) {
         super(message);
         this.requestId = requestId;
         this.message = message;

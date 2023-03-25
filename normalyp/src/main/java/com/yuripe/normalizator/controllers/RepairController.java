@@ -25,7 +25,7 @@ import com.yuripe.normalizator.exceptions.CarException;
 import com.yuripe.normalizator.exceptions.CustomerException;
 import com.yuripe.normalizator.exceptions.EmployeeException;
 import com.yuripe.normalizator.exceptions.RepairException;
-import com.yuripe.normalizator.exceptions.WorkException;
+import com.yuripe.normalizator.exceptions.JobException;
 import com.yuripe.normalizator.models.Car;
 import com.yuripe.normalizator.models.Customer;
 import com.yuripe.normalizator.models.EVehicleType;
@@ -41,7 +41,7 @@ import com.yuripe.normalizator.security.services.CarService;
 import com.yuripe.normalizator.security.services.CustomerService;
 import com.yuripe.normalizator.security.services.EmployeeService;
 import com.yuripe.normalizator.security.services.RepairService;
-import com.yuripe.normalizator.security.services.WorkService;
+import com.yuripe.normalizator.security.services.JobService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -67,7 +67,7 @@ public class RepairController {
   RepairService repairService;
   
   @Autowired
-  WorkService workService;
+  JobService jobService;
 
   @GetMapping("/all")
   @PreAuthorize("hasRole('SUPERVISOR') or hasRole('ADMIN')")
@@ -170,9 +170,9 @@ public class RepairController {
   
   @DeleteMapping("/removeRepair/{id}")
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<Map<String, Boolean>> deleteRepairById(@PathVariable Long id) throws RepairException, WorkException {
+  public ResponseEntity<Map<String, Boolean>> deleteRepairById(@PathVariable Long id) throws RepairException, JobException {
 	  Repair actualRepair = repairService.getRepair(id);	  
-	  workService.deleteWorkByRepair(id);
+	  jobService.deleteJobByRepair(id);
 	  repairService.deleteRepair(id);
 	  
 	Map<String, Boolean> response = new HashMap<>();

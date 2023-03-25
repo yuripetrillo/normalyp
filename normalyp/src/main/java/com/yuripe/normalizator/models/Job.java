@@ -8,15 +8,15 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Entity
-@Table(name = "works")
-public class Work {
+@Table(name = "jobs")
+public class Job {
   @Id
-  @Column(name = "workId")
+  @Column(name = "jobId")
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long workId;
+  private Long jobId;
   
   @NotNull
-  private int workingHours;
+  private int jobingHours;
   
   @NotNull
   @Column(columnDefinition = "DATE")
@@ -32,34 +32,34 @@ public class Work {
   @ManyToOne
   private Employee employee;
 
-  public Work() {
+  public Job() {
 
   }
 
-	public Work(Long workId, @NotBlank int workingHours, @NotNull LocalDate date, @NotBlank @Size(max = 50) @Email String note, Repair repair, Employee employee) {
+	public Job(Long jobId, @NotBlank int jobingHours, @NotNull LocalDate date, @NotBlank @Size(max = 50) @Email String note, Repair repair, Employee employee) {
 		super();
-		this.workId = workId;
-		this.workingHours = workingHours;
+		this.jobId = jobId;
+		this.jobingHours = jobingHours;
 		this.note = note;
 		this.repair = repair;
 		this.employee = employee;
 		this.date = date;
 	}
 	
-	public Long getWorkId() {
-		return workId;
+	public Long getJobId() {
+		return jobId;
 	}
 	
-	public void setWorkId(Long workId) {
-		this.workId = workId;
+	public void setJobId(Long jobId) {
+		this.jobId = jobId;
 	}
 	
-	public int getWorkingHours() {
-		return workingHours;
+	public int getJobingHours() {
+		return jobingHours;
 	}
 	
-	public void setWorkingHours(int workingHours) {
-		this.workingHours = workingHours;
+	public void setJobingHours(int jobingHours) {
+		this.jobingHours = jobingHours;
 	}
 	
 	public String getNote() {

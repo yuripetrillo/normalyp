@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.yuripe.normalizator.exceptions.CarException;
 import com.yuripe.normalizator.exceptions.CustomerException;
 import com.yuripe.normalizator.exceptions.EmployeeException;
@@ -32,29 +31,29 @@ import com.yuripe.normalizator.models.Customer;
 import com.yuripe.normalizator.models.EVehicleType;
 import com.yuripe.normalizator.models.Employee;
 import com.yuripe.normalizator.models.Repair;
-import com.yuripe.normalizator.models.Work;
+import com.yuripe.normalizator.models.Job;
 import com.yuripe.normalizator.payload.request.NewCarRequest;
 import com.yuripe.normalizator.payload.request.NewCustomerRequest;
-import com.yuripe.normalizator.payload.request.NewWorkRequest;
+import com.yuripe.normalizator.payload.request.NewJobRequest;
 import com.yuripe.normalizator.payload.response.MessageResponse;
 import com.yuripe.normalizator.repositories.EmployeeRepository;
 import com.yuripe.normalizator.repositories.RepairRepository;
-import com.yuripe.normalizator.repositories.WorkRepository;
+import com.yuripe.normalizator.repositories.JobRepository;
 import com.yuripe.normalizator.security.services.CarService;
 import com.yuripe.normalizator.security.services.CustomerService;
 import com.yuripe.normalizator.security.services.EmployeeService;
 import com.yuripe.normalizator.security.services.RepairService;
-import com.yuripe.normalizator.security.services.WorkService;
+import com.yuripe.normalizator.security.services.JobService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/work")
-public class WorkController {
+@RequestMapping("/api/batchProxy")
+public class BatchProxyController {
   @Autowired
   EmployeeRepository employeeRepository;
   
   @Autowired
-  WorkRepository workRepository;
+  JobRepository JobRepository;
   
   @Autowired
   RepairRepository repairRepository;
@@ -73,76 +72,99 @@ public class WorkController {
   RepairService repairService;
   
   @Autowired
-  WorkService workService;
+  JobService JobService;
 
   @GetMapping("/all")
   @PreAuthorize("hasRole('SUPERVISOR') or hasRole('ADMIN')")
-  public List<Work> getAllWorks() {
-    return workRepository.findAll();
+  public List<Job> getAllJobs() {
+    return JobRepository.findAll();
   }
   
-  @PostMapping("/add/{employeeWorking}/{repairId}")
+  
+  @PostMapping("/launchJob")
   @PreAuthorize("hasRole('SUPERVISOR') or hasRole('ADMIN') or hasRole('USER')")
-  public ResponseEntity<?> addNewWork(@PathVariable Long employeeWorking, @PathVariable Long repairId, @RequestBody NewWorkRequest workRequest) throws CarException, EmployeeException, CustomerException, RepairException {
+  public ResponseEntity<?> launchJob(@PathVariable Long employeeJobing, @PathVariable Long repairId, @RequestBody NewJobRequest JobRequest) throws CarException, EmployeeException, CustomerException, RepairException {
 	  Repair rep = repairService.getRepair(repairId);
-	  Employee emp = employeeService.getEmployee(employeeWorking);
+	  Employee emp = employeeService.getEmployee(employeeJobing);
 	   
-	  Work work = new Work();
-	  work.setEmployee(emp);
-	  work.setRepair(rep);
-	  if (!validateInput(workRequest.getNote(), workRequest.getWorkingHours())) {
+	  Job job = new Job();
+	  job.setEmployee(emp);
+	  job.setRepair(rep);
+	  if (!validateInput(JobRequest.getNote(), JobRequest.getWorkingHours())) {
 		  throw new InputMismatchException(
 				  );
 	  }
-	  work.setNote(workRequest.getNote());
-	  work.setWorkingHours(workRequest.getWorkingHours());
-	  work.setDate(LocalDate.now());
+	  job.setNote(JobRequest.getNote());
+	  job.setJobingHours(JobRequest.getWorkingHours());
+	  job.setDate(LocalDate.now());
 
-	  workService.addWork(work);
-	  return ResponseEntity.ok(new MessageResponse("Work added successfully!"));
+	  JobService.addJob(job);
+	  return ResponseEntity.ok(new MessageResponse("Job added successfully!"));
   }
   
   
-  private boolean validateInput(String note, int workingHours) {
-	  return (note.length() > 50 || note.length() < 1 || Objects.isNull(note) || workingHours > 8 || workingHours < 1 || Objects.isNull(workingHours) ) ? false : true;
+  @PostMapping("/add/{employeeJobing}/{repairId}")
+  @PreAuthorize("hasRole('SUPERVISOR') or hasRole('ADMIN') or hasRole('USER')")
+  public ResponseEntity<?> addNewJob(@PathVariable Long employeeJobing, @PathVariable Long repairId, @RequestBody NewJobRequest JobRequest) throws CarException, EmployeeException, CustomerException, RepairException {
+	  Repair rep = repairService.getRepair(repairId);
+	  Employee emp = employeeService.getEmployee(employeeJobing);
+	   
+	  Job job = new Job();
+	  job.setEmployee(emp);
+	  job.setRepair(rep);
+	  if (!validateInput(JobRequest.getNote(), JobRequest.getWorkingHours())) {
+		  throw new InputMismatchException(
+				  );
+	  }
+	  job.setNote(JobRequest.getNote());
+	  job.setJobingHours(JobRequest.getWorkingHours());
+	  job.setDate(LocalDate.now());
+
+	  JobService.addJob(job);
+	  return ResponseEntity.ok(new MessageResponse("Job added successfully!"));
+  }
+  
+  
+  private boolean validateInput(String note, int JobingHours) {
+	  return (note.length() > 50 || note.length() < 1 || Objects.isNull(note) || JobingHours > 8 || JobingHours < 1 || Objects.isNull(JobingHours) ) ? false : true;
 }
 
-@GetMapping("/getWork/{id}")
+@GetMapping("/getJob/{id}")
   @PreAuthorize("hasRole('SUPERVISOR') or hasRole('ADMIN') or hasRole('USER')")
-  public ResponseEntity<?> getWorkById(@PathVariable Long id) {
-	  Optional<Work> actualWork = workRepository.findById(id);
-    return actualWork.isPresent() ? ResponseEntity.ok(workRepository.findById(id)) : ResponseEntity
+  public ResponseEntity<?> getJobById(@PathVariable Long id) {
+	  Optional<Job> actualJob = JobRepository.findById(id);
+    return actualJob.isPresent() ? ResponseEntity.ok(JobRepository.findById(id)) : ResponseEntity
             .badRequest()
-            .body(new MessageResponse("Error: Work not exists with id: " + id));
+            .body(new MessageResponse("Error: Job not exists with id: " + id));
   }
   
-  @GetMapping("/getWorkRepair/{repairId}")
+  @GetMapping("/getJobRepair/{repairId}")
   @PreAuthorize("hasRole('SUPERVISOR') or hasRole('ADMIN') or hasRole('USER')")
-  public ResponseEntity<?> getWorkByRepairId(@PathVariable Long repairId) {
-	  Optional<List<Work>> actualWork = workRepository.findByRepair_repairId(repairId);
-    return actualWork.isPresent() ? ResponseEntity.ok(actualWork) : ResponseEntity
+  public ResponseEntity<?> getJobByRepairId(@PathVariable Long repairId) {
+	  Optional<List<Job>> actualJob = JobRepository.findByRepair_repairId(repairId);
+    return actualJob.isPresent() ? ResponseEntity.ok(actualJob) : ResponseEntity
             .badRequest()
-            .body(new MessageResponse(String.format("Error: No associated works with this repair [id: %d]", repairId)));
+            .body(new MessageResponse(String.format("Error: No associated Jobs with this repair [id: %d]", repairId)));
   }
   
   
-  @PutMapping("/updateWork/{id}")
+  @PutMapping("/updateJob/{id}")
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<Work> updateWork(@PathVariable Long id, @RequestBody Work work) {
-	  Work actualWork = workRepository.findById(id)
-    		.orElseThrow(() -> new NoSuchElementException("Work not exists with id: " + id));
+  public ResponseEntity<Job> updateJob(@PathVariable Long id, @RequestBody Job job) {
+	  Job actualJob = JobRepository.findById(id)
+    		.orElseThrow(() -> new NoSuchElementException("Job not exists with id: " + id));
 
 
-    return ResponseEntity.ok(workRepository.save(actualWork));
+    return ResponseEntity.ok(JobRepository.save(actualJob));
   }
   
-  @DeleteMapping("/removeWork/{id}")
+  @DeleteMapping("/removeJob/{id}")
   @PreAuthorize("hasRole('ADMIN')")
-  public ResponseEntity<Map<String, Boolean>> deleteWorkById(@PathVariable Long id) {
-	  Work actualWork = workRepository.findById(id)
-	    		.orElseThrow(() -> new NoSuchElementException("Work not exists with id: " + id));
+  public ResponseEntity<Map<String, Boolean>> deleteJobById(@PathVariable Long id) {
+	  Job actualJob = JobRepository.findById(id)
+	    		.orElseThrow(() -> new NoSuchElementException("Job not exists with id: " + id));
 	  
-	  workRepository.delete(actualWork);
+	  JobRepository.delete(actualJob);
 	
     return ResponseEntity.ok(null);
   }
@@ -198,7 +220,7 @@ public class WorkController {
   
   @GetMapping("/todo")
   @PreAuthorize("hasRole('SUPERVISOR')")
-  public String getWorksToDo() {
+  public String getJobsToDo() {
     return "Moderator Board.";
   }
 }

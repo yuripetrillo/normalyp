@@ -2,7 +2,7 @@ package com.yuripe.normalizator.payload.request;
 
 import javax.validation.constraints.*;
 
-public class NewWorkRequest {
+public class NewJobRequest {
 	  @NotBlank
 	  private int workingHours;
 	  
