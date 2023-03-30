@@ -62,12 +62,12 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
-	    <dependency>
-	        <groupId>com.yuripe.core</groupId>
+
+		<dependency>
+			<groupId>com.yuripe.core</groupId>
 			<artifactId>library</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-	    </dependency>
+		</dependency>
 
 	</dependencies>
 

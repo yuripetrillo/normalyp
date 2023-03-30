@@ -1,5 +1,6 @@
 package com.yuripe.normalizator.controllers;
 
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.InputMismatchException;
@@ -22,7 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
+import com.yuripe.core.library.utility.FtpClient;
 import com.yuripe.normalizator.configurations.FTPServiceCustom;
 import com.yuripe.normalizator.exceptions.CarException;
 import com.yuripe.normalizator.exceptions.CustomerException;
@@ -87,10 +88,10 @@ public class BatchProxyController {
   
   @PostMapping("/launchJob")
   @PreAuthorize("hasRole('SUPERVISOR') or hasRole('ADMIN') or hasRole('USER')")
-  public ResponseEntity<String> launchJob() {
+  public ResponseEntity<String> launchJob() throws IOException {
+	  FtpClient ftpClient = new FtpClient("127.0.0.1", 21, "yuri", "adminftp");
 	  
-	  
-	  return ResponseEntity.ok(ftp.call() + "Job launched successfully!");
+	  return ResponseEntity.ok(ftp.checkFtpServerState(ftpClient) + "\n Job launched successfully!");
   }
   
   
