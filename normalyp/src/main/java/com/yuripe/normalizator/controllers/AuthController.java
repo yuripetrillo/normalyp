@@ -30,7 +30,7 @@ import com.yuripe.normalizator.payload.response.MessageResponse;
 import com.yuripe.normalizator.repositories.EmployeeRepository;
 import com.yuripe.normalizator.repositories.RoleRepository;
 import com.yuripe.normalizator.security.jwt.JwtUtils;
-import com.yuripe.normalizator.security.services.UserDetailsImpl;
+import com.yuripe.normalizator.services.UserDetailsImpl;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController

@@ -37,11 +37,11 @@ import com.yuripe.normalizator.payload.request.NewRepairRequest;
 import com.yuripe.normalizator.payload.response.MessageResponse;
 import com.yuripe.normalizator.repositories.EmployeeRepository;
 import com.yuripe.normalizator.repositories.RepairRepository;
-import com.yuripe.normalizator.security.services.CarService;
-import com.yuripe.normalizator.security.services.CustomerService;
-import com.yuripe.normalizator.security.services.EmployeeService;
-import com.yuripe.normalizator.security.services.RepairService;
-import com.yuripe.normalizator.security.services.JobService;
+import com.yuripe.normalizator.services.CarService;
+import com.yuripe.normalizator.services.CustomerService;
+import com.yuripe.normalizator.services.EmployeeService;
+import com.yuripe.normalizator.services.RepairService;
+import com.yuripe.normalizator.services.JobService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController

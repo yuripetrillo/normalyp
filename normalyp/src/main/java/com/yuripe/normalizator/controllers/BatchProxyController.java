@@ -10,6 +10,10 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import javax.validation.Valid;
+
+import com.yuripe.normalizator.models.*;
+import com.yuripe.normalizator.repositories.SFTPRepository;
+import com.yuripe.normalizator.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,12 +33,6 @@ import com.yuripe.normalizator.exceptions.CarException;
 import com.yuripe.normalizator.exceptions.CustomerException;
 import com.yuripe.normalizator.exceptions.EmployeeException;
 import com.yuripe.normalizator.exceptions.RepairException;
-import com.yuripe.normalizator.models.Car;
-import com.yuripe.normalizator.models.Customer;
-import com.yuripe.normalizator.models.EVehicleType;
-import com.yuripe.normalizator.models.Employee;
-import com.yuripe.normalizator.models.Repair;
-import com.yuripe.normalizator.models.Job;
 import com.yuripe.normalizator.payload.request.NewCarRequest;
 import com.yuripe.normalizator.payload.request.NewCustomerRequest;
 import com.yuripe.normalizator.payload.request.NewJobRequest;
@@ -42,11 +40,6 @@ import com.yuripe.normalizator.payload.response.MessageResponse;
 import com.yuripe.normalizator.repositories.EmployeeRepository;
 import com.yuripe.normalizator.repositories.RepairRepository;
 import com.yuripe.normalizator.repositories.JobRepository;
-import com.yuripe.normalizator.security.services.CarService;
-import com.yuripe.normalizator.security.services.CustomerService;
-import com.yuripe.normalizator.security.services.EmployeeService;
-import com.yuripe.normalizator.security.services.RepairService;
-import com.yuripe.normalizator.security.services.JobService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -63,6 +56,9 @@ public class BatchProxyController {
   
   @Autowired
   CarService carService;
+
+  @Autowired
+  SFTPService sftpService;
   
   @Autowired
   CustomerService customerService;
@@ -88,14 +84,25 @@ public class BatchProxyController {
   
   @PostMapping("/launchJob")
   @PreAuthorize("hasRole('SUPERVISOR') or hasRole('ADMIN') or hasRole('USER')")
-  public ResponseEntity<String> launchJob() throws IOException {
-	  FtpClient ftpClient = new FtpClient("127.0.0.1", 21, "yuri", "adminftp");
-	  
-	  return ResponseEntity.ok(ftp.checkFtpServerState(ftpClient) + "\n Job launched successfully!");
+  public ResponseEntity<String> launchJob(String scheduleName, String fileNamePattern) throws IOException {
+      if(Objects.isNull(scheduleName)) {
+          return ResponseEntity.noContent().eTag("no_server_info_passed").build();
+      }
+
+      SFTP sftpServer = sftpService.getSftp(scheduleName);
+      //"127.0.0.1", 21, "yuri", "adminftp"
+	  FtpClient ftpClient = new FtpClient(sftpServer.getHost(), sftpServer.getPort(), sftpServer.getUsername(), sftpServer.getPassword());
+      if(!ftp.checkFtpServerState(ftpClient)) {
+          return ResponseEntity.internalServerError().build();
+      }
+      if(!ftp.checkValidMandatoryInput(ftpClient)) {
+          return ResponseEntity.noContent().build();
+      }
+	  return ResponseEntity.ok("Server status OK, input is valid, Job launched successfully!");
   }
   
   
-  @PostMapping("/add/{employeeJobing}/{repairId}")
+  @PostMapping("/add/{employeeWorking}/{repairId}")
   @PreAuthorize("hasRole('SUPERVISOR') or hasRole('ADMIN') or hasRole('USER')")
   public ResponseEntity<?> addNewJob(@PathVariable Long employeeJobing, @PathVariable Long repairId, @RequestBody NewJobRequest JobRequest) throws CarException, EmployeeException, CustomerException, RepairException {
 	  Repair rep = repairService.getRepair(repairId);

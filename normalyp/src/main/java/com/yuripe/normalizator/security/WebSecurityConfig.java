@@ -19,7 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.yuripe.normalizator.security.jwt.AuthEntryPointJwt;
 import com.yuripe.normalizator.security.jwt.AuthTokenFilter;
-import com.yuripe.normalizator.security.services.UserDetailsServiceImpl;
+import com.yuripe.normalizator.services.UserDetailsServiceImpl;
 
 @Configuration
 @EnableGlobalMethodSecurity(

@@ -1,4 +1,4 @@
-package com.yuripe.normalizator.security.services;
+package com.yuripe.normalizator.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;

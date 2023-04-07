@@ -1,4 +1,4 @@
-package com.yuripe.normalizator.security.services;
+package com.yuripe.normalizator.services;
 
 import java.util.List;
 
@@ -32,6 +32,6 @@ public class CarService {
     }
 
     public void deleteCar(String plate) {
-        this.carRepository.deleteByPlate(plate);;
+        this.carRepository.deleteByPlate(plate);
     }
 }

@@ -1,4 +1,4 @@
-package com.yuripe.normalizator.security.services;
+package com.yuripe.normalizator.services;
 
 import java.util.Collection;
 import java.util.List;

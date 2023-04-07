@@ -1,4 +1,4 @@
-package com.yuripe.normalizator.security.services;
+package com.yuripe.normalizator.services;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;

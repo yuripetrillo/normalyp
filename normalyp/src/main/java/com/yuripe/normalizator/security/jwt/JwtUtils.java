@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import com.yuripe.normalizator.security.services.UserDetailsImpl;
+import com.yuripe.normalizator.services.UserDetailsImpl;
 
 import io.jsonwebtoken.*;
 
