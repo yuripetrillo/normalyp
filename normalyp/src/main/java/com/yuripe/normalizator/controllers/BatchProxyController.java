@@ -51,7 +51,8 @@ import com.yuripe.normalizator.repositories.JobRepository;
 @RestController
 @RequestMapping("/api/batchProxy")
 public class BatchProxyController {
-	private static final Logger logger = LoggerFactory.getLogger(BatchProxyController.class);
+  private static final Logger logger = LoggerFactory.getLogger(BatchProxyController.class);
+  
   @Autowired
   EmployeeRepository employeeRepository;
   
@@ -108,7 +109,7 @@ public class BatchProxyController {
           return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Requested data not available on server.");
       }
       
-      //findJob by code and launch.
+      //COPY BACKUP FILE and findJob by code and launch.
 	  return ResponseEntity.status(HttpStatus.OK).body("Server status OK, input is valid, Job launched successfully!");
   }
   
