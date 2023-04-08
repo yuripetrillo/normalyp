@@ -7,7 +7,7 @@ import javax.validation.constraints.Size;
 import org.hibernate.annotations.NaturalId;
 
 @Entity
-@Table(name = "customers", 
+@Table(name = "customers", schema = "Application", 
     uniqueConstraints = { 
       @UniqueConstraint(columnNames = "telephoneNumber")})
 public class Customer {

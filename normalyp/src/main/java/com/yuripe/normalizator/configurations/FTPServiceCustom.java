@@ -16,12 +16,11 @@ public class FTPServiceCustom {
 	}
 	
 	public boolean checkFtpServerState(FtpClient ftpClient) throws IOException {
-		return ftp.checkFTPServerTargetFile(ftpClient);
+		return ftp.checkFTPServerStatus(ftpClient);
 	}
 	
-	public boolean checkValidMandatoryInput(FtpClient ftpClient) throws IOException {
-		ftp.checkFTPServerTargetFile(ftpClient);
-		return false;
+	public boolean checkValidMandatoryInput(FtpClient ftpClient, String filePattern) throws IOException {
+		return ftp.checkFTPServerTargetFile(ftpClient, filePattern);
 	}
 	
 }

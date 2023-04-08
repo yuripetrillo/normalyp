@@ -6,7 +6,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Entity
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = "code")})
+@Table(name = "SFTP", schema = "Config", uniqueConstraints = {@UniqueConstraint(columnNames = "code")})
 public class SFTP {
 
     @Id
@@ -15,7 +15,7 @@ public class SFTP {
 
     @NotBlank
     @Size(max = 12)
-    private Long code;
+    private String code;
 
     @NotBlank
     @Size(max = 50)
@@ -36,7 +36,11 @@ public class SFTP {
     @Size(max = 10)
     private String authType;
 
-    public SFTP(Long sftpId, Long code, String host, int port, String username, String password, String authType) {
+    
+    public SFTP() {
+    	
+    }
+    public SFTP(Long sftpId, String code, String host, int port, String username, String password, String authType) {
         this.sftpId = sftpId;
         this.code = code;
         this.host = host;
@@ -54,11 +58,11 @@ public class SFTP {
         this.sftpId = sftpId;
     }
 
-    public Long getCode() {
+    public String getCode() {
         return code;
     }
 
-    public void setCode(Long code) {
+    public void setCode(String code) {
         this.code = code;
     }
 

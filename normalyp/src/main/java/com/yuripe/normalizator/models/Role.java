@@ -3,7 +3,7 @@ package com.yuripe.normalizator.models;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "roles")
+@Table(name = "roles", schema = "Config")
 public class Role {
   @Id
   @Column(name = "roleId")

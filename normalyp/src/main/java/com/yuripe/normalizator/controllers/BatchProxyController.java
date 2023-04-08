@@ -14,7 +14,11 @@ import javax.validation.Valid;
 import com.yuripe.normalizator.models.*;
 import com.yuripe.normalizator.repositories.SFTPRepository;
 import com.yuripe.normalizator.services.*;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -27,6 +31,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.yuripe.core.library.services.FTPService;
 import com.yuripe.core.library.utility.FtpClient;
 import com.yuripe.normalizator.configurations.FTPServiceCustom;
 import com.yuripe.normalizator.exceptions.CarException;
@@ -45,6 +51,7 @@ import com.yuripe.normalizator.repositories.JobRepository;
 @RestController
 @RequestMapping("/api/batchProxy")
 public class BatchProxyController {
+	private static final Logger logger = LoggerFactory.getLogger(BatchProxyController.class);
   @Autowired
   EmployeeRepository employeeRepository;
   
@@ -82,23 +89,27 @@ public class BatchProxyController {
   }
   
   
-  @PostMapping("/launchJob")
+  @PostMapping("/launchJob/{scheduleName}/{filePattern}")
   @PreAuthorize("hasRole('SUPERVISOR') or hasRole('ADMIN') or hasRole('USER')")
-  public ResponseEntity<String> launchJob(String scheduleName, String fileNamePattern) throws IOException {
+  public ResponseEntity<String> launchJob(@PathVariable String scheduleName, @PathVariable String filePattern) throws IOException {
       if(Objects.isNull(scheduleName)) {
-          return ResponseEntity.noContent().eTag("no_server_info_passed").build();
+          return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
+                  .body("You must specify valid schedulation code.");
       }
 
       SFTP sftpServer = sftpService.getSftp(scheduleName);
-      //"127.0.0.1", 21, "yuri", "adminftp"
 	  FtpClient ftpClient = new FtpClient(sftpServer.getHost(), sftpServer.getPort(), sftpServer.getUsername(), sftpServer.getPassword());
       if(!ftp.checkFtpServerState(ftpClient)) {
-          return ResponseEntity.internalServerError().build();
+    	  logger.error(HttpStatus.SERVICE_UNAVAILABLE.toString());
+          return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
       }
-      if(!ftp.checkValidMandatoryInput(ftpClient)) {
-          return ResponseEntity.noContent().build();
+      if(!ftp.checkValidMandatoryInput(ftpClient, filePattern)) {
+    	  logger.error("Requested data ".concat(HttpStatus.NOT_FOUND.toString()));
+          return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Requested data not available on server.");
       }
-	  return ResponseEntity.ok("Server status OK, input is valid, Job launched successfully!");
+      
+      //findJob by code and launch.
+	  return ResponseEntity.status(HttpStatus.OK).body("Server status OK, input is valid, Job launched successfully!");
   }
   
   

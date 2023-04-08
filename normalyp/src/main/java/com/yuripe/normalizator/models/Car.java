@@ -6,7 +6,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 @Entity
-@Table(name = "cars", 
+@Table(name = "cars", schema = "Application",
     uniqueConstraints = { 
       @UniqueConstraint(columnNames = "plate")})
 public class Car {
