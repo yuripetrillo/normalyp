@@ -10,11 +10,8 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import javax.validation.Valid;
-
 import com.yuripe.normalizator.models.*;
-import com.yuripe.normalizator.repositories.SFTPRepository;
 import com.yuripe.normalizator.services.*;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +28,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.yuripe.core.library.services.FTPService;
 import com.yuripe.core.library.utility.FtpClient;
 import com.yuripe.normalizator.configurations.FTPServiceCustom;
 import com.yuripe.normalizator.exceptions.CarException;
