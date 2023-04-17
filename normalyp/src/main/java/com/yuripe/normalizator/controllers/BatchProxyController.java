@@ -1,6 +1,10 @@
 package com.yuripe.normalizator.controllers;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.InputMismatchException;
@@ -47,6 +51,9 @@ import com.yuripe.normalizator.repositories.JobRepository;
 @RequestMapping("/api/batchProxy")
 public class BatchProxyController {
   private static final Logger logger = LoggerFactory.getLogger(BatchProxyController.class);
+  private static final String targetPath = new File(BatchProxyController.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParentFile().getParentFile().getAbsolutePath();
+  private static final String outputDir = targetPath.concat("/BATCH_IN_FILES/");
+  private static final String backupDir = targetPath.concat("BACKUP_IN_FILES/");
   
   @Autowired
   EmployeeRepository employeeRepository;
@@ -104,12 +111,42 @@ public class BatchProxyController {
           return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Requested data not available on server.");
       }
       
-      //COPY BACKUP FILE and findJob by code and launch.
+      if(!ftp.getFileFromSFTP(filePattern, outputDir.concat(filePattern))) {
+    	  return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body("Cannot get file from server.");
+      }
+      backup(new File(filePattern + outputDir), new File(backupDir));
+      
 	  return ResponseEntity.status(HttpStatus.OK).body("Server status OK, input is valid, Job launched successfully!");
   }
   
+
   
-  @PostMapping("/add/{employeeWorking}/{repairId}")
+  @SuppressWarnings("resource")
+  private static void backup(File sourceFile, File destFile) throws IOException {
+	    if (!sourceFile.exists()) {
+	        return;
+	    }
+	    if (!destFile.exists()) {
+	        destFile.createNewFile();
+	    }
+	    FileChannel source = null;
+	    FileChannel destination = null;
+	    source = new FileInputStream(sourceFile).getChannel();
+	    destination = new FileOutputStream(destFile).getChannel();
+	    if (destination != null && source != null) {
+	        destination.transferFrom(source, 0, source.size());
+	    }
+	    if (source != null) {
+	        source.close();
+	    }
+	    if (destination != null) {
+	        destination.close();
+	    }
+
+	}
+
+
+@PostMapping("/add/{employeeWorking}/{repairId}")
   @PreAuthorize("hasRole('SUPERVISOR') or hasRole('ADMIN') or hasRole('USER')")
   public ResponseEntity<?> addNewJob(@PathVariable Long employeeJobing, @PathVariable Long repairId, @RequestBody NewJobRequest JobRequest) throws CarException, EmployeeException, CustomerException, RepairException {
 	  Repair rep = repairService.getRepair(repairId);
@@ -174,16 +211,7 @@ public class BatchProxyController {
 	
     return ResponseEntity.ok(null);
   }
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+
   @GetMapping("/checkCustomer")
   public ResponseEntity<?> verifyGetCustomer(@RequestParam String customerCF) throws CustomerException {
 	  Customer customer = customerService.getCustomer(customerCF);

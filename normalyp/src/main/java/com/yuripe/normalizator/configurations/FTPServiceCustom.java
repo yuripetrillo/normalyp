@@ -23,4 +23,7 @@ public class FTPServiceCustom {
 		return ftp.checkFTPServerTargetFile(ftpClient, filePattern);
 	}
 	
+	public boolean getFileFromSFTP(String filePattern, String destination) throws IOException {
+		return ftp.downloadFile(filePattern, destination);
+	}
 }
