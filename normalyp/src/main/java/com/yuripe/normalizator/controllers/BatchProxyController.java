@@ -2,9 +2,13 @@ package com.yuripe.normalizator.controllers;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.InputMismatchException;
@@ -53,7 +57,8 @@ public class BatchProxyController {
   private static final Logger logger = LoggerFactory.getLogger(BatchProxyController.class);
   private static final String targetPath = new File(BatchProxyController.class.getProtectionDomain().getCodeSource().getLocation().getPath()).getParentFile().getParentFile().getAbsolutePath();
   private static final String outputDir = targetPath.concat("/BATCH_IN_FILES/");
-  private static final String backupDir = targetPath.concat("BACKUP_IN_FILES/");
+  private static final String backupDir = targetPath.concat("/BACKUP_IN_FILES/");
+  private static final String batchInputFolder = Paths.get("C:\\Users\\yurip\\git\\INPUT_FILE_BATCH").normalize().toString();
   
   @Autowired
   EmployeeRepository employeeRepository;
@@ -92,9 +97,9 @@ public class BatchProxyController {
   }
   
   
-  @PostMapping("/launchJob/{scheduleName}/{filePattern}")
+  @PostMapping("/launchJob/{scheduleName}/{filePattern}/{batchCode}")
   @PreAuthorize("hasRole('SUPERVISOR') or hasRole('ADMIN') or hasRole('USER')")
-  public ResponseEntity<String> launchJob(@PathVariable String scheduleName, @PathVariable String filePattern) throws IOException {
+  public ResponseEntity<String> launchJob(@PathVariable String scheduleName, @PathVariable String filePattern, @PathVariable String batchCode) throws IOException {
       if(Objects.isNull(scheduleName)) {
           return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
                   .body("You must specify valid schedulation code.");
@@ -111,10 +116,16 @@ public class BatchProxyController {
           return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Requested data not available on server.");
       }
       
+      //Move file from FTP instead of COPY
       if(!ftp.getFileFromSFTP(filePattern, outputDir.concat(filePattern))) {
     	  return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body("Cannot get file from server.");
       }
-      backup(new File(filePattern + outputDir), new File(backupDir));
+      backupFile(new File(outputDir.concat(filePattern)), new File(backupDir.concat(filePattern)));
+      moveFile(outputDir.concat(filePattern), Paths.get(batchInputFolder + "\\".concat(batchCode)).normalize().toString().concat("\\" + filePattern));
+      
+      //CALL BATCH BY SCHEDULENAME AND FILEPATTERN
+      
+      //GET INFO FROM DB AND SEND JSON REQUEST
       
 	  return ResponseEntity.status(HttpStatus.OK).body("Server status OK, input is valid, Job launched successfully!");
   }
@@ -122,9 +133,9 @@ public class BatchProxyController {
 
   
   @SuppressWarnings("resource")
-  private static void backup(File sourceFile, File destFile) throws IOException {
+  private static void backupFile(File sourceFile, File destFile) throws IOException {
 	    if (!sourceFile.exists()) {
-	        return;
+	        throw new FileNotFoundException();
 	    }
 	    if (!destFile.exists()) {
 	        destFile.createNewFile();
@@ -136,6 +147,7 @@ public class BatchProxyController {
 	    if (destination != null && source != null) {
 	        destination.transferFrom(source, 0, source.size());
 	    }
+	    
 	    if (source != null) {
 	        source.close();
 	    }
@@ -143,6 +155,18 @@ public class BatchProxyController {
 	        destination.close();
 	    }
 
+	}
+  
+  public boolean moveFile(String sourcePath, String targetPath) {
+	    boolean fileMoved = false;
+
+	    try {
+	        Files.move(Paths.get(sourcePath), Paths.get(targetPath), StandardCopyOption.REPLACE_EXISTING);
+	        fileMoved = true;
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return fileMoved;
 	}
 
 
