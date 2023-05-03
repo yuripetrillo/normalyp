@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
 import javax.validation.Valid;
 import com.yuripe.normalizator.models.*;
 import com.yuripe.normalizator.services.*;
@@ -25,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,6 +39,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+
 import com.yuripe.core.library.utility.FtpClient;
 import com.yuripe.normalizator.configurations.FTPServiceCustom;
 import com.yuripe.normalizator.exceptions.CarException;
@@ -48,6 +54,7 @@ import com.yuripe.normalizator.payload.request.NewJobRequest;
 import com.yuripe.normalizator.payload.response.MessageResponse;
 import com.yuripe.normalizator.repositories.EmployeeRepository;
 import com.yuripe.normalizator.repositories.RepairRepository;
+import com.yuripe.normalizator.rest.BatchClient;
 import com.yuripe.normalizator.repositories.JobRepository;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -89,6 +96,9 @@ public class BatchProxyController {
   
   @Autowired
   FTPServiceCustom ftp;
+  
+  @Autowired
+  BatchClient batchClient;
 
   @GetMapping("/all")
   @PreAuthorize("hasRole('SUPERVISOR') or hasRole('ADMIN')")
@@ -121,18 +131,33 @@ public class BatchProxyController {
     	  return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body("Cannot get file from server.");
       }
       backupFile(new File(outputDir.concat(filePattern)), new File(backupDir.concat(filePattern)));
+      
+      //findBatchCodeByScheduleNameAndFilePattern or create table to manage scheduling...
       moveFile(outputDir.concat(filePattern), Paths.get(batchInputFolder + "\\".concat(batchCode)).normalize().toString().concat("\\" + filePattern));
       
       //CALL BATCH BY SCHEDULENAME AND FILEPATTERN
-      
+      callBatch(batchCode, filePattern);
       //GET INFO FROM DB AND SEND JSON REQUEST
       
 	  return ResponseEntity.status(HttpStatus.OK).body("Server status OK, input is valid, Job launched successfully!");
   }
   
-
   
-  @SuppressWarnings("resource")
+  private CompletableFuture<ResponseEntity<String>> callBatch(String batchCode, String filePattern) {
+	// TODO Auto-generated method stub
+    /*String req = UriComponentsBuilder.fromHttpUrl("http://localhost:8080/api/batch0A/launchJob/resources/sample-data2.TXT")
+    .queryParam("filePattern", "{filePattern}").encode()
+    .toUriString();*/
+	  filePattern = "ciaoa.txt";
+	  String uri = "http://localhost:8080/api/" + batchCode + "/launchJob/resources/" + filePattern;
+	  return batchClient.callBatch(uri);
+	  //cap MAX calls threadpools and give error if too many requests?
+	  
+	  //OR MOVE CODE OF BATCHES INTO THIS? AND ISTANTIATE CALSS DIRECTLY?
+}
+
+
+@SuppressWarnings("resource")
   private static void backupFile(File sourceFile, File destFile) throws IOException {
 	    if (!sourceFile.exists()) {
 	        throw new FileNotFoundException();
