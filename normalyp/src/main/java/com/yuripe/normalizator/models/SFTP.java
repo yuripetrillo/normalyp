@@ -1,5 +1,7 @@
 package com.yuripe.normalizator.models;
 
+import java.util.Set;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -13,9 +15,11 @@ public class SFTP {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long sftpId;
 
+    
     @NotBlank
     @Size(max = 12)
-    private String code;
+    //@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy="sftp_code")
+    private String code; /*    private Set<FileConfiguration> fileConfigurations; ???*/
 
     @NotBlank
     @Size(max = 50)
