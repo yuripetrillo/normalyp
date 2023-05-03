@@ -31,7 +31,7 @@ public class FileConfiguration {
     //@JoinColumn(name = "sftp_code")
 	@NotBlank
     @Size(max = 50)
-	private SFTP ftpCode;
+	private String ftpCode;
 	
 	@NotBlank
     @Size(max = 50)
@@ -93,13 +93,13 @@ public class FileConfiguration {
 
 
 
-	public SFTP getFtpCode() {
+	public String getFtpCode() {
 		return ftpCode;
 	}
 
 
 
-	public void setFtpCode(SFTP ftpCode) {
+	public void setFtpCode(String ftpCode) {
 		this.ftpCode = ftpCode;
 	}
 
